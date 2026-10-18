@@ -11,6 +11,10 @@ export interface LoanType {
   defaultRate: number
   defaultMonths: number
   maxYears: number
+  /** Slider bounds for the amount, and one-tap presets. UI conveniences only. */
+  amountRange: [number, number]
+  presets: number[]
+  rateRange: [number, number]
   /** Whether a down payment and balloon/residual make sense for this type. */
   hasDownPayment: boolean
   hasBalloon: boolean

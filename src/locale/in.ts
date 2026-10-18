@@ -33,7 +33,7 @@ export const IN: LocaleConfig = {
   },
   loanTypes: [
     {
-      id: 'home', label: 'Home loan', short: 'Home', secured: true, defaultAmount: 5_000_000, defaultRate: 8.5, defaultMonths: 240, maxYears: 30,
+      id: 'home', label: 'Home loan', short: 'Home', secured: true, defaultAmount: 5_000_000, defaultRate: 8.5, defaultMonths: 240, maxYears: 30, amountRange: [500000, 50000000], presets: [2500000, 5000000, 7500000, 10000000, 15000000], rateRange: [6, 14],
       hasDownPayment: true, hasBalloon: false,
       askLender: [
         'Is the rate the same for my loan amount slab and credit score, or is the advertised rate for a narrower profile?',
@@ -43,7 +43,7 @@ export const IN: LocaleConfig = {
       ],
     },
     {
-      id: 'car', label: 'Car loan', short: 'Car', secured: true, defaultAmount: 800_000, defaultRate: 9, defaultMonths: 60, maxYears: 8,
+      id: 'car', label: 'Car loan', short: 'Car', secured: true, defaultAmount: 800_000, defaultRate: 9, defaultMonths: 60, maxYears: 8, amountRange: [100000, 5000000], presets: [500000, 800000, 1200000, 2000000], rateRange: [7, 16],
       hasDownPayment: true, hasBalloon: true,
       askLender: [
         'Is this rate fixed for the full tenure?',
@@ -53,7 +53,7 @@ export const IN: LocaleConfig = {
       ],
     },
     {
-      id: 'personal', label: 'Personal loan', short: 'Personal', secured: false, defaultAmount: 500_000, defaultRate: 12, defaultMonths: 48, maxYears: 7,
+      id: 'personal', label: 'Personal loan', short: 'Personal', secured: false, defaultAmount: 500_000, defaultRate: 12, defaultMonths: 48, maxYears: 7, amountRange: [25000, 4000000], presets: [100000, 300000, 500000, 1000000], rateRange: [9, 30],
       hasDownPayment: false, hasBalloon: false,
       askLender: [
         'Is the quoted rate per year (p.a.) or per month? Is it on a reducing balance or a flat rate?',
@@ -63,7 +63,7 @@ export const IN: LocaleConfig = {
       ],
     },
     {
-      id: 'education', label: 'Education loan', short: 'Education', secured: false, defaultAmount: 1_500_000, defaultRate: 10, defaultMonths: 120, maxYears: 15,
+      id: 'education', label: 'Education loan', short: 'Education', secured: false, defaultAmount: 1_500_000, defaultRate: 10, defaultMonths: 120, maxYears: 15, amountRange: [100000, 15000000.0], presets: [500000, 1000000, 2000000, 4000000], rateRange: [7, 16],
       hasDownPayment: false, hasBalloon: false,
       askLender: [
         'How long is the moratorium, and is interest during it simple or compounded into the loan?',
@@ -73,12 +73,12 @@ export const IN: LocaleConfig = {
       ],
     },
     {
-      id: 'twowheeler', label: 'Two-wheeler loan', short: 'Two-wheeler', secured: true, defaultAmount: 120_000, defaultRate: 12, defaultMonths: 36, maxYears: 5,
+      id: 'twowheeler', label: 'Two-wheeler loan', short: 'Two-wheeler', secured: true, defaultAmount: 120_000, defaultRate: 12, defaultMonths: 36, maxYears: 5, amountRange: [20000, 500000], presets: [50000, 100000, 150000, 250000], rateRange: [8, 24],
       hasDownPayment: true, hasBalloon: false,
       askLender: ['Is the advertised rate a flat rate? What is the reducing-balance equivalent?', 'Are there document or hypothecation charges?'],
     },
     {
-      id: 'business', label: 'Business loan', short: 'Business', secured: false, defaultAmount: 1_000_000, defaultRate: 14, defaultMonths: 36, maxYears: 10,
+      id: 'business', label: 'Business loan', short: 'Business', secured: false, defaultAmount: 1_000_000, defaultRate: 14, defaultMonths: 36, maxYears: 10, amountRange: [100000, 20000000], presets: [500000, 1000000, 2500000, 5000000], rateRange: [10, 26],
       hasDownPayment: false, hasBalloon: false,
       askLender: [
         'Is this loan classified as a business loan to an individual or MSE, and what prepayment rules apply to it?',
@@ -87,12 +87,12 @@ export const IN: LocaleConfig = {
       ],
     },
     {
-      id: 'lap', label: 'Loan against property', short: 'LAP', secured: true, defaultAmount: 3_000_000, defaultRate: 10, defaultMonths: 180, maxYears: 20,
+      id: 'lap', label: 'Loan against property', short: 'LAP', secured: true, defaultAmount: 3_000_000, defaultRate: 10, defaultMonths: 180, maxYears: 20, amountRange: [500000, 50000000], presets: [2000000, 3000000, 5000000, 10000000], rateRange: [8, 16],
       hasDownPayment: false, hasBalloon: false,
       askLender: ['What loan-to-value ratio applies to my property type?', 'Is the end-use restricted?', 'What are valuation and legal charges?'],
     },
     {
-      id: 'gold', label: 'Gold loan', short: 'Gold', secured: true, defaultAmount: 200_000, defaultRate: 10, defaultMonths: 12, maxYears: 3,
+      id: 'gold', label: 'Gold loan', short: 'Gold', secured: true, defaultAmount: 200_000, defaultRate: 10, defaultMonths: 12, maxYears: 3, amountRange: [10000, 5000000], presets: [50000, 100000, 200000, 500000], rateRange: [8, 20],
       hasDownPayment: false, hasBalloon: false,
       askLender: [
         'Is this an EMI loan, or interest-only with principal at the end (bullet repayment)?',
@@ -101,7 +101,7 @@ export const IN: LocaleConfig = {
       ],
     },
     {
-      id: 'other', label: 'Other loan', short: 'Other', secured: false, defaultAmount: 500_000, defaultRate: 11, defaultMonths: 60, maxYears: 30,
+      id: 'other', label: 'Other loan', short: 'Other', secured: false, defaultAmount: 500_000, defaultRate: 11, defaultMonths: 60, maxYears: 30, amountRange: [10000, 50000000], presets: [100000, 500000, 1000000, 2500000], rateRange: [6, 30],
       hasDownPayment: false, hasBalloon: true, askLender: [],
     },
   ],
