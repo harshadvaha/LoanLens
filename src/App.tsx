@@ -1,5 +1,8 @@
-import { lazy, Suspense, useEffect, useState, type ReactNode } from 'react'
-import { href, usePageFocus, useRoute } from './ui/router'
+import { lazy, Suspense, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { href, navigate, usePageFocus, useRoute } from './ui/router'
+import { LogoMark, Wordmark } from './ui/Logo'
+import { CommandPalette, type PaletteItem } from './ui/CommandPalette'
+import { useTheme, type Theme } from './ui/theme'
 import Home from './pages/Home'
 import NewLoan from './pages/NewLoan'
 import { LoanDetail, LoanForm, MyLoans } from './pages/MyLoans'
@@ -24,6 +27,9 @@ const I = {
   learn: 'M4 5h7a2 2 0 0 1 2 2v12a2 2 0 0 0-2-2H4zM20 5h-7v14h7z',
   more: 'M5 12h.01M12 12h.01M19 12h.01',
   prepay: 'M12 3v18M5 10l7-7 7 7',
+  search: 'M11 4a7 7 0 1 0 0 14 7 7 0 0 0 0-14zM20 20l-3.5-3.5',
+  plus: 'M12 5v14M5 12h14',
+  sun: 'M12 4V2m0 20v-2m8-8h2M2 12h2m13.66-5.66 1.41-1.41M4.93 19.07l1.41-1.41m0-11.32L4.93 4.93m14.14 14.14-1.41-1.41M12 7a5 5 0 1 0 0 10 5 5 0 0 0 0-10z',
 }
 
 function Icon({ d }: { d: string }) {
@@ -52,22 +58,63 @@ const isActive = (current: string, p: string) => (p === '/' ? current === '/' : 
 function Brand() {
   return (
     <a className="brand" href={href('/')} aria-label="LoanLens home">
-      <svg className="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
-        <rect width="32" height="32" rx="6" fill="var(--ink)" />
-        <rect x="6" y="19" width="13" height="5" fill="var(--paper)" />
-        <rect x="19" y="19" width="7" height="5" fill="var(--interest)" />
-        <rect x="6" y="9" width="20" height="2" fill="var(--paper)" />
-      </svg>
-      <span className="brand-name">LoanLens</span>
+      <LogoMark className="brand-mark" />
+      <Wordmark />
     </a>
+  )
+}
+
+const isMac = typeof navigator !== 'undefined' && /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent)
+
+function ThemeSwitch({ theme, setTheme }: { theme: Theme; setTheme: (t: Theme) => void }) {
+  return (
+    <div className="theme-switch" role="group" aria-label="Appearance">
+      {(['system', 'light', 'dark'] as Theme[]).map((t) => (
+        <button key={t} type="button" aria-pressed={theme === t} onClick={() => setTheme(t)}>
+          {t === 'system' ? 'Auto' : t[0].toUpperCase() + t.slice(1)}
+        </button>
+      ))}
+    </div>
   )
 }
 
 export default function App() {
   const route = useRoute()
   const [more, setMore] = useState(false)
+  const [palette, setPalette] = useState(false)
+  const [theme, setTheme] = useTheme()
   usePageFocus(route.path)
   useEffect(() => setMore(false), [route.path])
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault()
+        setPalette((o) => !o)
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
+  const pageItems = useMemo<PaletteItem[]>(
+    () => NAV.map((n) => ({ id: 'page-' + n.path, group: 'Go to', label: n.label, icon: n.icon, keywords: n.group, run: () => navigate(n.path) })),
+    [],
+  )
+  const actionItems = useMemo<PaletteItem[]>(
+    () => [
+      { id: 'act-add', group: 'Actions', label: 'Add a loan', icon: I.plus, keywords: 'new save existing', run: () => navigate('/loans/new') },
+      { id: 'act-backup', group: 'Actions', label: 'Back up or restore my data', icon: I.loans, keywords: 'export import json', run: () => navigate('/loans') },
+      {
+        id: 'act-theme',
+        group: 'Actions',
+        label: 'Switch appearance',
+        sub: 'Auto → Light → Dark',
+        icon: I.sun,
+        keywords: 'dark mode light theme',
+        run: () => setTheme(theme === 'system' ? 'light' : theme === 'light' ? 'dark' : 'system'),
+      },
+    ],
+    [theme, setTheme],
+  )
 
   const p = route.parts
   let page: ReactNode
@@ -126,6 +173,11 @@ export default function App() {
       </a>
       <nav className="sidebar" aria-label="Main">
         <Brand />
+        <button type="button" className="search-btn" onClick={() => setPalette(true)} aria-label="Search (Command K)">
+          <Icon d={I.search} />
+          Search
+          <kbd>{isMac ? '⌘' : 'Ctrl'} K</kbd>
+        </button>
         {NAV.map((n) => (
           <div key={n.path}>
             {n.group && <div className="nav-group">{n.group}</div>}
@@ -136,15 +188,26 @@ export default function App() {
           </div>
         ))}
         <div className="sidebar-foot">
-          Your numbers stay in this browser. No sign-in, no tracking, no lender commissions.
+          <ThemeSwitch theme={theme} setTheme={setTheme} />
+          <span>Your numbers stay in this browser. No sign-in, no tracking, no lender commissions.</span>
         </div>
       </nav>
 
       <header className="topbar">
         <Brand />
-        <a className="btn btn-s" href={href('/learn')}>
-          Learn
-        </a>
+        <div className="row" style={{ gap: 2 }}>
+          <button type="button" className="icon-btn" aria-label="Search" onClick={() => setPalette(true)}>
+            <Icon d={I.search} />
+          </button>
+          <button
+            type="button"
+            className="icon-btn"
+            aria-label={`Appearance: ${theme === 'system' ? 'auto' : theme}. Change`}
+            onClick={() => setTheme(theme === 'system' ? 'light' : theme === 'light' ? 'dark' : 'system')}
+          >
+            <Icon d={I.sun} />
+          </button>
+        </div>
       </header>
 
       <main className="main" id="main">
@@ -177,6 +240,7 @@ export default function App() {
           More
         </button>
       </nav>
+      <CommandPalette open={palette} onClose={() => setPalette(false)} pages={pageItems} actions={actionItems} />
       {more && (
         <>
           <div className="sheet-backdrop" onClick={() => setMore(false)} />
