@@ -18,6 +18,13 @@ Static site. No backend, no accounts, no tracking, no paid APIs. Everything you 
 | **Tools** | Affordability, EMI stress test, rate-rise decision, foreclosure, loan-from-EMI, tenure, implied rate, flat-rate converter, red-flag checklist, ask-the-lender questions |
 | **Learn** | 21 concepts (plain English → example → why it matters → common mistake → what to ask), RBI borrower rules and tax notes with source dates |
 
+## v3 interface
+
+- macOS-style design: system font (SF Pro on Apple devices, self-hosted Inter elsewhere — no Google Fonts call), cool neutrals, grouped cards, an inspector panel for inputs, light/dark/auto.
+- Logo: a lens holding the loan — principal (white) and interest (coral) split by the falling balance curve.
+- Slider-first inputs: every amount, rate and tenure has a slider (log scale for amounts, snapping to round numbers), loan-type presets, and amounts shown in lakh/crore inside the field.
+- ⌘K / Ctrl+K command palette for pages, tools, saved loans and actions.
+
 ## Run locally
 
 Requires Node 18+.
@@ -25,7 +32,7 @@ Requires Node 18+.
 ```bash
 npm install
 npm run dev        # http://localhost:5173
-npm test           # 36 calculation tests
+npm test           # 66 calculation tests (incl. independent reference checks)
 npm run build      # type-check + production build into dist/
 npm run preview    # serve the production build
 ```
@@ -50,6 +57,7 @@ src/
     scenarios.ts   Optimiser, prepayment, refinance, offer comparison, rate rise, foreclosure, liquidity
     household.ts   Affordability and stress test (thresholds passed in as policy)
     core.test.ts   Engine tests
+    reference.test.ts  Independent re-derivation: 300 random loans vs a float simulation, numpy-financial EMI/IRR values, edge cases
   locale/          Everything India-specific
     in.ts          Currency, GST rate, lakh/crore units, repo-rate benchmark, loan types,
                    ask-the-lender questions, affordability/stress thresholds, RBI rules, tax notes
