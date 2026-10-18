@@ -4,7 +4,7 @@ import { compact, duration, loanType, money } from '../locale'
 import type { LoanTypeId } from '../locale/types'
 import { getStore, loanEmi, saveLoan, useStore, type Loan } from '../store/loans'
 import { href, useRoute } from './router'
-import { DecimalInput, MoneyInput, TenureInput } from './inputs'
+import { DecimalInput, MoneyInput, RANGES, TenureInput } from './inputs'
 
 export interface Basics {
   principal: number
@@ -99,13 +99,14 @@ export function useLoanSource(kindFilter?: Loan['kind']) {
           </div>
         </div>
       )}
-      <MoneyInput label="Outstanding principal" value={b.principal} onChange={(v) => update({ principal: v })} required />
-      <DecimalInput label="Current interest rate" value={b.rate} onChange={(v) => update({ rate: v })} hint="Per year" max={40} step={0.05} />
+      <MoneyInput label="Outstanding principal" value={b.principal} onChange={(v) => update({ principal: v })} required range={RANGES.outstanding} />
+      <DecimalInput label="Current interest rate" value={b.rate} onChange={(v) => update({ rate: v })} hint="Per year" max={40} step={0.05} range={RANGES.rate} />
       <TenureInput label="Remaining tenure" months={b.months} onChange={(v) => update({ months: v })} />
       <MoneyInput
         label="Current EMI"
         value={b.emi}
         onChange={(v) => update({ emi: v })}
+        range={RANGES.emi}
         hint={
           b.emi > 0 && Number.isFinite(impliedMonths) && Math.abs(impliedMonths - b.months) > 2
             ? `At this EMI the loan runs ${duration(impliedMonths)}, not ${duration(b.months)}. We use your EMI.`
