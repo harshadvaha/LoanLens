@@ -6,27 +6,11 @@ import { compact, duration, locale, loanType, money, pct } from '../locale'
 import type { LoanTypeId } from '../locale/types'
 import { setHousehold, useStore } from '../store/loans'
 import { Arrow, Assumptions, Badge, Insight, PageHead, Section, Stat } from '../ui/bits'
-import { Chips, DecimalInput, MoneyInput, TenureInput } from '../ui/inputs'
+import { Chips, DecimalInput, MoneyInput, RANGES, TenureInput } from '../ui/inputs'
 import { useLoanSource } from '../ui/LoanSource'
 import { href } from '../ui/router'
+import { TOOLS } from './toolList'
 
-const TOOLS: { id: string; title: string; sub: string; to?: string }[] = [
-  { id: 'affordability', title: 'How much can I safely borrow?', sub: 'Comfortable EMI and loan, not the lender maximum' },
-  { id: 'stress', title: 'EMI stress test', sub: 'Rate rises, income drops, big expenses' },
-  { id: 'rate-rise', title: 'My rate went up — what now?', sub: 'Higher EMI, longer tenure, or prepay' },
-  { id: 'foreclosure', title: 'Should I close my loan early?', sub: 'Net benefit vs keeping your cash' },
-  { id: 'loan-from-emi', title: 'Loan amount from an EMI', sub: 'What EMI ₹X buys at a rate and tenure' },
-  { id: 'tenure', title: 'How long will my loan run?', sub: 'Tenure from amount, rate and EMI' },
-  { id: 'rate-from-emi', title: 'What rate am I really paying?', sub: 'Rate implied by amount, EMI and tenure' },
-  { id: 'flat-rate', title: 'Flat rate converter', sub: 'Convert a flat rate to its reducing-balance equivalent' },
-  { id: 'redflags', title: 'Offer red-flag checklist', sub: 'Tick what applies; see why it matters' },
-  { id: 'ask', title: 'Ask the lender', sub: 'Questions for your loan type' },
-  { id: '', title: 'EMI calculator & amortisation', sub: 'Full cost, charts and schedule', to: '/new' },
-  { id: '', title: 'Prepayment planner', sub: 'Reduce EMI vs tenure, many prepayments', to: '/prepay' },
-  { id: '', title: 'Refinancing & break-even', sub: 'Balance transfer after switching costs', to: '/refinance' },
-  { id: '', title: 'Compare offers', sub: 'Rank by total cost', to: '/compare' },
-  { id: '', title: 'Rate sensitivity', sub: 'EMI and interest at nearby rates', to: '/rates?tab=understand' },
-]
 
 export default function Tools({ id }: { id?: string }) {
   const tool = TOOLS.find((t) => t.id === id && id)
@@ -82,12 +66,12 @@ function HouseholdInputs({ withFund = true }: { withFund?: boolean }) {
   const { household: h } = useStore()
   return (
     <>
-      <MoneyInput label="Monthly take-home income" value={h.monthlyIncome} onChange={(v) => setHousehold({ monthlyIncome: v })} required />
-      <MoneyInput label="Existing EMIs" value={h.existingEmis} onChange={(v) => setHousehold({ existingEmis: v })} hint="Other loans you already pay each month" />
-      <MoneyInput label="Essential monthly expenses" value={h.monthlyEssentials} onChange={(v) => setHousehold({ monthlyEssentials: v })} hint="Rent, food, utilities, school fees, insurance" />
-      <MoneyInput label="Other fixed commitments" value={h.otherObligations} onChange={(v) => setHousehold({ otherObligations: v })} hint="SIPs you won’t stop, support to family" />
-      <DecimalInput label="Dependents" value={h.dependents} onChange={(v) => setHousehold({ dependents: Math.round(v) })} suffix="people" max={15} />
-      {withFund && <MoneyInput label="Emergency fund" value={h.emergencyFund} onChange={(v) => setHousehold({ emergencyFund: v })} />}
+      <MoneyInput label="Monthly take-home income" value={h.monthlyIncome} onChange={(v) => setHousehold({ monthlyIncome: v })} required range={RANGES.income} presets={[50_000, 1_00_000, 2_00_000, 3_00_000]} />
+      <MoneyInput range={RANGES.expense} label="Existing EMIs" value={h.existingEmis} onChange={(v) => setHousehold({ existingEmis: v })} hint="Other loans you already pay each month" />
+      <MoneyInput range={RANGES.expense} label="Essential monthly expenses" value={h.monthlyEssentials} onChange={(v) => setHousehold({ monthlyEssentials: v })} hint="Rent, food, utilities, school fees, insurance" />
+      <MoneyInput range={[0, 300_000]} label="Other fixed commitments" value={h.otherObligations} onChange={(v) => setHousehold({ otherObligations: v })} hint="SIPs you won’t stop, support to family" />
+      <DecimalInput label="Dependents" value={h.dependents} onChange={(v) => setHousehold({ dependents: Math.round(v) })} suffix="people" max={15} range={[0, 8]} step={1} />
+      {withFund && <MoneyInput range={RANGES.savings} label="Emergency fund" value={h.emergencyFund} onChange={(v) => setHousehold({ emergencyFund: v })} />}
       <p className="tiny muted">Saved on this device and shared with the stress test and optimiser.</p>
     </>
   )
@@ -107,7 +91,7 @@ function Affordability() {
       <div className="controls stack">
         <Chips label="Loan type" value={type} onChange={(t) => (setType(t), setRate(loanType(t).defaultRate), setMonths(loanType(t).defaultMonths))} options={locale.loanTypes.filter((t) => t.id !== 'other').map((t) => ({ value: t.id, label: t.short }))} />
         <HouseholdInputs />
-        <DecimalInput label="Expected rate" value={rate} onChange={setRate} max={40} step={0.05} />
+        <DecimalInput label="Expected rate" value={rate} onChange={setRate} max={40} step={0.05} range={RANGES.rate} />
         <TenureInput label="Preferred tenure" months={months} onChange={setMonths} maxYears={lt.maxYears} />
       </div>
       {!r ? (
@@ -199,7 +183,7 @@ function Stress() {
         <hr className="rule" />
         <h2 className="h3">Your household</h2>
         <HouseholdInputs />
-        <MoneyInput label="Size of an unexpected expense" value={shock} onChange={setShock} />
+        <MoneyInput label="Size of an unexpected expense" value={shock} onChange={setShock} range={[0, 2_000_000]} />
       </div>
       {!now ? (
         <div className="callout warn">Enter the loan and your monthly income.</div>
@@ -270,7 +254,7 @@ function RateRise() {
     <div className="workbench">
       <div className="controls stack">
         {src.ui}
-        <DecimalInput label="New interest rate" value={newRate} onChange={setNewRate} max={40} step={0.05} hint={newRate > b.rate ? `+${pct(newRate - b.rate)}` : undefined} />
+        <DecimalInput label="New interest rate" value={newRate} onChange={setNewRate} max={40} step={0.05} range={RANGES.rate} hint={newRate > b.rate ? `+${pct(newRate - b.rate)}` : undefined} />
       </div>
       {!r ? (
         <div className="callout warn">Enter your loan and the new rate.</div>
@@ -373,12 +357,12 @@ function Foreclosure() {
     <div className="workbench">
       <div className="controls stack">
         {src.ui}
-        <DecimalInput label="Foreclosure charge" value={charge} onChange={setFc} max={10} suffix="% of balance" hint={`${locale.chargeTax.label} added`} />
+        <DecimalInput label="Foreclosure charge" value={charge} onChange={setFc} max={10} range={RANGES.chargePct} suffix="% of balance" hint={`${locale.chargeTax.label} added`} />
         <hr className="rule" />
-        <MoneyInput label="Cash and savings available" value={hh.cashForPrepayment} onChange={(v) => setHousehold({ cashForPrepayment: v })} />
-        <MoneyInput label="Emergency fund" value={hh.emergencyFund} onChange={(v) => setHousehold({ emergencyFund: v })} />
-        <MoneyInput label="Monthly essential expenses" value={hh.monthlyEssentials} onChange={(v) => setHousehold({ monthlyEssentials: v })} />
-        <DecimalInput label="Return you'd expect on the cash instead" value={hh.alternativeReturnPct} onChange={(v) => setHousehold({ alternativeReturnPct: v })} suffix="% / yr" max={30} />
+        <MoneyInput range={RANGES.savings} label="Cash and savings available" value={hh.cashForPrepayment} onChange={(v) => setHousehold({ cashForPrepayment: v })} />
+        <MoneyInput range={RANGES.savings} label="Emergency fund" value={hh.emergencyFund} onChange={(v) => setHousehold({ emergencyFund: v })} />
+        <MoneyInput range={RANGES.expense} label="Monthly essential expenses" value={hh.monthlyEssentials} onChange={(v) => setHousehold({ monthlyEssentials: v })} />
+        <DecimalInput label="Return you'd expect on the cash instead" value={hh.alternativeReturnPct} onChange={(v) => setHousehold({ alternativeReturnPct: v })} suffix="% / yr" max={30} range={[0, 15]} step={0.5} />
       </div>
       {!f ? (
         <div className="callout warn">Enter your loan.</div>
@@ -427,8 +411,8 @@ function LoanFromEmi() {
   return (
     <div className="workbench">
       <div className="controls stack">
-        <MoneyInput label="EMI you can pay" value={e} onChange={setE} />
-        <DecimalInput label="Interest rate" value={rate} onChange={setRate} max={40} step={0.05} />
+        <MoneyInput label="EMI you can pay" value={e} onChange={setE} range={RANGES.emi} />
+        <DecimalInput label="Interest rate" value={rate} onChange={setRate} max={40} step={0.05} range={RANGES.rate} />
         <TenureInput label="Tenure" months={months} onChange={setMonths} />
       </div>
       <div className="stack">
@@ -453,9 +437,9 @@ function Tenure() {
   return (
     <div className="workbench">
       <div className="controls stack">
-        <MoneyInput label="Loan amount / outstanding" value={p} onChange={setP} />
-        <DecimalInput label="Interest rate" value={rate} onChange={setRate} max={40} step={0.05} />
-        <MoneyInput label="EMI" value={e} onChange={setE} />
+        <MoneyInput label="Loan amount / outstanding" value={p} onChange={setP} range={RANGES.outstanding} />
+        <DecimalInput label="Interest rate" value={rate} onChange={setRate} max={40} step={0.05} range={RANGES.rate} />
+        <MoneyInput label="EMI" value={e} onChange={setE} range={RANGES.emi} />
       </div>
       <div className="stack">
         <div className="eyebrow">The loan would run</div>
@@ -480,8 +464,8 @@ function RateFromEmi() {
   return (
     <div className="workbench">
       <div className="controls stack">
-        <MoneyInput label="Amount you receive" value={p} onChange={setP} hint="Use the amount after any deducted fees to see the all-in rate" />
-        <MoneyInput label="EMI" value={e} onChange={setE} />
+        <MoneyInput range={RANGES.outstanding} label="Amount you receive" value={p} onChange={setP} hint="Use the amount after any deducted fees to see the all-in rate" />
+        <MoneyInput label="EMI" value={e} onChange={setE} range={RANGES.emi} />
         <TenureInput label="Tenure" months={months} onChange={setMonths} />
       </div>
       <div className="stack">
@@ -502,8 +486,8 @@ function FlatRate() {
   return (
     <div className="workbench">
       <div className="controls stack">
-        <DecimalInput label="Flat rate quoted" value={flat} onChange={setFlat} max={40} step={0.1} suffix="% p.a. flat" />
-        <MoneyInput label="Loan amount" value={p} onChange={setP} />
+        <DecimalInput label="Flat rate quoted" value={flat} onChange={setFlat} max={40} step={0.1} suffix="% p.a. flat" range={[3, 25]} />
+        <MoneyInput label="Loan amount" value={p} onChange={setP} range={RANGES.outstanding} />
         <TenureInput label="Tenure" months={months} onChange={setMonths} />
       </div>
       <div className="stack">

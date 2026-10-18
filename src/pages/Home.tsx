@@ -7,16 +7,16 @@ import { href } from '../ui/router'
 import { loanHealth } from '../insights'
 
 const INTENTS = [
-  { label: 'Calculate a new loan', sub: 'EMI, total interest, true cost and schedule', to: '/new' },
-  { label: 'Check my existing loan', sub: 'What is left to pay, and how healthy the rate is', to: '/loans' },
-  { label: 'Compare offers', sub: 'Ranked by total cost, not headline rate', to: '/compare' },
-  { label: 'Reduce my interest', sub: 'Prepayments, higher EMI, yearly step-ups', to: '/optimize' },
-  { label: 'Know whether I should prepay', sub: 'Reduce EMI or tenure, and what it does to your cash', to: '/prepay' },
-  { label: 'Understand an interest rate', sub: 'What a quoted rate means and how sensitive it is', to: '/rates?tab=understand' },
-  { label: 'My rate went up — what now?', sub: 'Higher EMI, longer tenure, or prepay', to: '/tools/rate-rise' },
-  { label: 'See whether refinancing is worthwhile', sub: 'Savings after switching costs, and break-even', to: '/refinance' },
-  { label: 'How much can I safely borrow?', sub: 'Comfortable EMI, not the lender maximum', to: '/tools/affordability' },
-  { label: 'What should I ask the lender?', sub: 'Questions for your loan type, plus red flags', to: '/tools/ask' },
+  { label: 'Calculate a new loan', sub: 'EMI, total interest, true cost and schedule', to: '/new', c: '#5a54e8', d: 'M5 3h14v18H5zM8 7h8M8 12h2m3 0h3M8 16h2m3 0h3' },
+  { label: 'Check my existing loan', sub: 'What is left to pay, and how healthy the rate is', to: '/loans', c: '#2f80ed', d: 'M4 6h16M4 12h16M4 18h10' },
+  { label: 'Compare offers', sub: 'Ranked by total cost, not headline rate', to: '/compare', c: '#0ea5a4', d: 'M8 4v16M16 4v16M4 8h8M12 16h8' },
+  { label: 'Reduce my interest', sub: 'Prepayments, higher EMI, yearly step-ups', to: '/optimize', c: '#1c9d57', d: 'M4 18 10 12l4 4 6-8M14 8h6v6' },
+  { label: 'Know whether I should prepay', sub: 'Reduce EMI or tenure, and what it does to your cash', to: '/prepay', c: '#f08c1a', d: 'M12 20V4M5 11l7-7 7 7' },
+  { label: 'Understand an interest rate', sub: 'What a quoted rate means and how sensitive it is', to: '/rates?tab=understand', c: '#a855f7', d: 'M5 19 19 5M7 7h.01M17 17h.01' },
+  { label: 'My rate went up — what now?', sub: 'Higher EMI, longer tenure, or prepay', to: '/tools/rate-rise', c: '#ef4444', d: 'M12 3 2 20h20zM12 10v4M12 17h.01' },
+  { label: 'See whether refinancing is worthwhile', sub: 'Savings after switching costs, and break-even', to: '/refinance', c: '#ec4899', d: 'M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3M18 3v4h-4M6 21v-4h4' },
+  { label: 'How much can I safely borrow?', sub: 'Comfortable EMI, not the lender maximum', to: '/tools/affordability', c: '#0f9fd8', d: 'M12 3l8 4v5c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V7z' },
+  { label: 'What should I ask the lender?', sub: 'Questions for your loan type, plus red flags', to: '/tools/ask', c: '#64748b', d: 'M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12zM9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6M12 16.5h.01' },
 ]
 
 export function LoanCard({ l }: { l: Loan }) {
@@ -115,7 +115,12 @@ export default function Home() {
             const [path, qs] = i.to.split('?')
             return (
               <a key={i.label} className="intent" href={`#${path}${qs ? '?' + qs : ''}`}>
-                <span>
+                <span className="tile" style={{ background: i.c }} aria-hidden="true">
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d={i.d} />
+                  </svg>
+                </span>
+                <span style={{ flex: 1, minWidth: 0 }}>
                   {i.label}
                   <small>{i.sub}</small>
                 </span>
@@ -169,7 +174,7 @@ export function BenchmarkCard() {
       {editing ? (
         <div className="row" style={{ alignItems: 'flex-end' }}>
           <div style={{ maxWidth: 180 }}>
-            <DecimalInput label="Current repo rate" value={v} onChange={setV} max={20} step={0.25} />
+            <DecimalInput label="Current repo rate" value={v} onChange={setV} max={20} step={0.25} range={[3, 9]} />
           </div>
           <button
             type="button"

@@ -4,7 +4,7 @@ import { rateSensitivity } from '../core/scenarios'
 import { compact, duration, fmtDate, money, pct } from '../locale'
 import { currentBenchmark, useStore } from '../store/loans'
 import { Assumptions, Insight, PageHead, Section, Source } from '../ui/bits'
-import { DecimalInput, MoneyInput, Segmented, Slider, TenureInput } from '../ui/inputs'
+import { DecimalInput, MoneyInput, RANGES, Segmented, Slider, TenureInput } from '../ui/inputs'
 import { href, navigate, useRoute } from '../ui/router'
 
 export default function Rates() {
@@ -51,7 +51,7 @@ function Understand() {
   return (
     <div className="workbench">
       <div className="controls stack">
-        <DecimalInput label="Quoted rate" value={rate} onChange={setRate} max={40} step={0.05} suffix="% / year" />
+        <DecimalInput label="Quoted rate" value={rate} onChange={setRate} max={40} step={0.05} suffix="% / year" range={RANGES.rate} />
         <Segmented
           label="Rate type"
           value={floating}
@@ -61,7 +61,7 @@ function Understand() {
             { value: 'fixed', label: 'Fixed' },
           ]}
         />
-        <MoneyInput label="Loan amount" value={amount} onChange={setAmount} required />
+        <MoneyInput label="Loan amount" value={amount} onChange={setAmount} required range={RANGES.outstanding} />
         <TenureInput label="Tenure" months={months} onChange={setMonths} />
       </div>
       {!base ? (
@@ -160,9 +160,9 @@ function Floating() {
           <p className="small">
             Most Indian bank floating-rate loans are linked to an <strong>external benchmark</strong>, usually the {b.name}. Your rate = benchmark + spread.
           </p>
-          <DecimalInput label="Your spread" value={spread} onChange={setSpread} max={10} step={0.05} hint={`Your rate today: ${pct(b.value)} + ${pct(spread)} = ${pct(rate)}`} />
+          <DecimalInput label="Your spread" value={spread} onChange={setSpread} max={10} step={0.05} range={[0, 6]} hint={`Your rate today: ${pct(b.value)} + ${pct(spread)} = ${pct(rate)}`} />
           <Slider label="Benchmark moves by" value={move} min={-1.5} max={2} step={0.25} onChange={setMove} display={(v) => `${v > 0 ? '+' : ''}${pct(v)}`} />
-          <MoneyInput label="Outstanding" value={amount} onChange={setAmount} />
+          <MoneyInput label="Outstanding" value={amount} onChange={setAmount} range={RANGES.outstanding} />
           <TenureInput label="Remaining tenure" months={months} onChange={setMonths} />
         </div>
         <div className="stack">

@@ -6,7 +6,7 @@ import type { LoanTypeId } from '../locale/types'
 import { currentBenchmark, deleteLoan, exportJson, getStore, importJson, loanEmi, loanSchedule, newId, saveLoan, useStore, type Loan } from '../store/loans'
 import { Arrow, Badge, CostBar, Empty, Insight, PageHead, Section, Stat } from '../ui/bits'
 import { BalanceChart } from '../ui/charts'
-import { DecimalInput, FeeInput, MoneyInput, Segmented, Select, TenureInput, TextInput } from '../ui/inputs'
+import { DecimalInput, FeeInput, MoneyInput, RANGES, Segmented, Select, TenureInput, TextInput } from '../ui/inputs'
 import { href, navigate } from '../ui/router'
 import { ScheduleTable } from '../ui/Schedule'
 import { LoanCard } from './Home'
@@ -200,13 +200,14 @@ export function LoanForm({ id }: { id?: string }) {
             { value: 'offer', label: 'An offer I’m considering' },
           ]}
         />
-        <MoneyInput label={isOffer ? 'Loan amount' : 'Outstanding principal today'} value={l.principal} onChange={(principal) => set({ principal })} required={touched} />
+        <MoneyInput label={isOffer ? 'Loan amount' : 'Outstanding principal today'} value={l.principal} onChange={(principal) => set({ principal })} required={touched} range={loanType(l.type).amountRange} />
         <div className="grid-2">
-          <DecimalInput label={isOffer ? 'Interest rate' : 'Current interest rate'} value={l.rate} onChange={(rate) => set({ rate })} max={40} step={0.05} hint="Per year" />
+          <DecimalInput label={isOffer ? 'Interest rate' : 'Current interest rate'} value={l.rate} onChange={(rate) => set({ rate })} max={40} step={0.05} range={loanType(l.type).rateRange} hint="Per year" />
           <MoneyInput
             label={isOffer ? 'EMI (optional)' : 'Current EMI'}
             value={l.emi ?? 0}
             onChange={(v) => set({ emi: v || undefined })}
+            range={RANGES.emi}
             hint={l.emi && Number.isFinite(emiTerm) ? `Implies ${duration(emiTerm)} remaining` : l.emi ? 'Does not cover interest at this rate' : 'From your statement'}
           />
         </div>
@@ -217,6 +218,7 @@ export function LoanForm({ id }: { id?: string }) {
             onChange={(v) => set({ bestQuote: v || undefined })}
             max={40}
             step={0.05}
+            range={loanType(l.type).rateRange}
             hint="From another lender or your bank's current rate for new customers. Used to rate your loan's health."
           />
         )}
@@ -266,7 +268,7 @@ export function LoanForm({ id }: { id?: string }) {
                     { value: 'other', label: 'Other / not sure' },
                   ]}
                 />
-                <DecimalInput label="Spread over benchmark" value={l.spread ?? 0} onChange={(spread) => set({ spread: spread || undefined })} max={15} step={0.05} hint="From your sanction letter or KFS" />
+                <DecimalInput label="Spread over benchmark" value={l.spread ?? 0} onChange={(spread) => set({ spread: spread || undefined })} max={15} step={0.05} range={[0, 6]} hint="From your sanction letter or KFS" />
               </div>
               <div className="grid-2">
                 <Select
@@ -291,8 +293,8 @@ export function LoanForm({ id }: { id?: string }) {
         <summary>Charges</summary>
         <div className="stack" style={{ marginTop: 10 }}>
           <div className="grid-2">
-            <DecimalInput label="Prepayment charge" value={l.prepayChargePct} onChange={(prepayChargePct) => set({ prepayChargePct })} max={10} suffix="% of amount" />
-            <DecimalInput label="Foreclosure charge" value={l.foreclosureChargePct} onChange={(foreclosureChargePct) => set({ foreclosureChargePct })} max={10} suffix="% of balance" />
+            <DecimalInput label="Prepayment charge" value={l.prepayChargePct} onChange={(prepayChargePct) => set({ prepayChargePct })} max={10} range={RANGES.chargePct} suffix="% of amount" />
+            <DecimalInput label="Foreclosure charge" value={l.foreclosureChargePct} onChange={(foreclosureChargePct) => set({ foreclosureChargePct })} max={10} range={RANGES.chargePct} suffix="% of balance" />
           </div>
           {l.rateType === 'floating' && l.type !== 'business' && (
             <p className="tiny muted">For floating-rate loans to individuals for non-business purposes, RBI rules from 1 Jan 2026 bar prepayment charges. See Learn → Rules.</p>
@@ -305,8 +307,8 @@ export function LoanForm({ id }: { id?: string }) {
             onChange={(processingFee, processingFeeIsPct) => set({ charges: { ...l.charges, processingFee, processingFeeIsPct } })}
           />
           <div className="grid-2">
-            <MoneyInput label="Other charges" value={l.charges.otherCharges} onChange={(otherCharges) => set({ charges: { ...l.charges, otherCharges } })} />
-            <MoneyInput label="Insurance" value={l.charges.insurance} onChange={(insurance) => set({ charges: { ...l.charges, insurance } })} />
+            <MoneyInput range={[0, 200_000]} label="Other charges" value={l.charges.otherCharges} onChange={(otherCharges) => set({ charges: { ...l.charges, otherCharges } })} />
+            <MoneyInput range={[0, 500_000]} label="Insurance" value={l.charges.insurance} onChange={(insurance) => set({ charges: { ...l.charges, insurance } })} />
           </div>
         </div>
       </details>
@@ -316,8 +318,8 @@ export function LoanForm({ id }: { id?: string }) {
           <summary>Loan history (optional — for “already paid” figures)</summary>
           <div className="stack" style={{ marginTop: 10 }}>
             <div className="grid-2">
-              <MoneyInput label="Original loan amount" value={l.originalAmount ?? 0} onChange={(v) => set({ originalAmount: v || undefined })} />
-              <DecimalInput label="Original rate" value={l.originalRate ?? 0} onChange={(v) => set({ originalRate: v || undefined })} max={40} />
+              <MoneyInput range={loanType(l.type).amountRange} label="Original loan amount" value={l.originalAmount ?? 0} onChange={(v) => set({ originalAmount: v || undefined })} />
+              <DecimalInput label="Original rate" value={l.originalRate ?? 0} onChange={(v) => set({ originalRate: v || undefined })} max={40} step={0.05} range={loanType(l.type).rateRange} />
             </div>
             <div className="grid-2">
               <TenureInput label="Original tenure" months={l.originalMonths ?? 0} onChange={(v) => set({ originalMonths: v || undefined })} />

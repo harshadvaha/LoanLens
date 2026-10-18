@@ -36,7 +36,7 @@ export default function Prepay() {
           <h2 className="h3">Prepayments</h2>
           {rows.map((r, i) => (
             <div key={r.id} className="stack-s" style={{ paddingBottom: 8, borderBottom: '1px dotted var(--rule-2)' }}>
-              <MoneyInput label={`Prepayment ${i + 1}`} value={r.amount} onChange={(amount) => setRows(rows.map((x) => (x.id === r.id ? { ...x, amount } : x)))} />
+              <MoneyInput range={[0, Math.max(10_000, b.principal)]} label={`Prepayment ${i + 1}`} value={r.amount} onChange={(amount) => setRows(rows.map((x) => (x.id === r.id ? { ...x, amount } : x)))} />
               <div className="row" style={{ gap: 8, alignItems: 'flex-end' }}>
                 <div style={{ flex: 1 }}>
                   <Select label="When" value={String(r.at)} onChange={(v) => setRows(rows.map((x) => (x.id === r.id ? { ...x, at: Number(v) } : x)))} options={atOptions} />

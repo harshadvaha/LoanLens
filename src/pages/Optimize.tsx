@@ -5,7 +5,7 @@ import { compact, duration, loanType, money, monthLabel, pct } from '../locale'
 import { setHousehold, useStore } from '../store/loans'
 import { Assumptions, Badge, Insight, PageHead, Section } from '../ui/bits'
 import { BalanceChart } from '../ui/charts'
-import { DecimalInput, MoneyInput, Segmented, Select, Slider } from '../ui/inputs'
+import { DecimalInput, MoneyInput, RANGES, Segmented, Select, Slider } from '../ui/inputs'
 import { useLoanSource } from '../ui/LoanSource'
 import { href } from '../ui/router'
 
@@ -134,12 +134,12 @@ export default function Optimize() {
           <details className="disclosure" open={hasLiquidity}>
             <summary>Check your cash buffer</summary>
             <div className="stack" style={{ marginTop: 8 }}>
-              <MoneyInput label="Monthly essential expenses" value={hh.monthlyEssentials} onChange={(v) => setHousehold({ monthlyEssentials: v })} hint="Rent, food, bills, EMIs — what you can't skip" />
-              <MoneyInput label="Emergency fund" value={hh.emergencyFund} onChange={(v) => setHousehold({ emergencyFund: v })} />
-              <MoneyInput label="Other cash you could prepay from" value={hh.cashForPrepayment} onChange={(v) => setHousehold({ cashForPrepayment: v })} />
+              <MoneyInput range={RANGES.expense} label="Monthly essential expenses" value={hh.monthlyEssentials} onChange={(v) => setHousehold({ monthlyEssentials: v })} hint="Rent, food, bills, EMIs — what you can't skip" />
+              <MoneyInput range={RANGES.savings} label="Emergency fund" value={hh.emergencyFund} onChange={(v) => setHousehold({ emergencyFund: v })} />
+              <MoneyInput range={RANGES.savings} label="Other cash you could prepay from" value={hh.cashForPrepayment} onChange={(v) => setHousehold({ cashForPrepayment: v })} />
               <div className="grid-2">
-                <DecimalInput label="Keep a buffer of" value={hh.bufferMonths} onChange={(v) => setHousehold({ bufferMonths: v })} suffix="months" max={36} />
-                <DecimalInput label="Return elsewhere" value={hh.alternativeReturnPct} onChange={(v) => setHousehold({ alternativeReturnPct: v })} suffix="% / yr" max={30} hint="e.g. FD, debt fund" />
+                <DecimalInput label="Keep a buffer of" value={hh.bufferMonths} onChange={(v) => setHousehold({ bufferMonths: v })} suffix="months" max={36} range={[0, 24]} step={1} />
+                <DecimalInput label="Return elsewhere" value={hh.alternativeReturnPct} onChange={(v) => setHousehold({ alternativeReturnPct: v })} suffix="% / yr" max={30} range={[0, 15]} step={0.5} hint="e.g. FD, debt fund" />
               </div>
               <p className="tiny muted">Saved on this device, used across tools.</p>
             </div>

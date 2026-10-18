@@ -173,13 +173,14 @@ export default function NewLoan() {
             />
             <span className="tiny muted">Defaults are example values, not quotes.</span>
           </div>
-          <MoneyInput label="Loan amount" value={f.amount} onChange={(amount) => set({ amount })} required />
+          <MoneyInput label="Loan amount" value={f.amount} onChange={(amount) => set({ amount })} required range={lt.amountRange} presets={lt.presets} />
           <DecimalInput
             label="Interest rate"
             value={f.rate}
             onChange={(rate) => set({ rate })}
             max={f.basis === 'monthly' ? 5 : 50}
             step={0.05}
+            range={f.basis === 'monthly' ? [0.5, 3] : f.basis === 'flat' ? [3, 20] : lt.rateRange}
             suffix={f.basis === 'monthly' ? '% / month' : '% / year'}
             hint={
               f.basis === 'flat'
@@ -215,11 +216,11 @@ export default function NewLoan() {
           <details className="disclosure">
             <summary>More charges and options</summary>
             <div className="stack" style={{ marginTop: 8 }}>
-              <MoneyInput label="Legal, technical and other charges" value={f.other} onChange={(other) => set({ other })} hint={`${locale.chargeTax.label} added`} />
-              <MoneyInput label="Insurance or bundled products" value={f.insurance} onChange={(insurance) => set({ insurance })} hint="Paid upfront; premium already includes its own tax" />
-              {lt.hasDownPayment && <MoneyInput label="Down payment (your own money)" value={f.down} onChange={(down) => set({ down })} hint={f.down ? `Price ${money(f.amount + f.down)} · you finance ${pct((f.amount / (f.amount + f.down)) * 100, 0)}` : 'Not part of the cost of borrowing'} />}
-              {lt.hasBalloon && <MoneyInput label="Balloon / residual at the end" value={f.balloon} onChange={(balloon) => set({ balloon })} max={f.amount - 1} hint="Lowers the EMI, but you owe this lump sum with the last EMI" />}
-              <TextInput label="First EMI month (for dates)" value={f.startDate} onChange={(startDate) => set({ startDate })} placeholder="yyyy-mm-dd" />
+              <MoneyInput label="Legal, technical and other charges" value={f.other} onChange={(other) => set({ other })} range={[0, 200_000]} hint={`${locale.chargeTax.label} added`} />
+              <MoneyInput label="Insurance or bundled products" value={f.insurance} onChange={(insurance) => set({ insurance })} range={[0, 500_000]} hint="Paid upfront; premium already includes its own tax" />
+              {lt.hasDownPayment && <MoneyInput label="Down payment (your own money)" value={f.down} onChange={(down) => set({ down })} range={[0, Math.max(100_000, f.amount)]} hint={f.down ? `Price ${money(f.amount + f.down)} · you finance ${pct((f.amount / (f.amount + f.down)) * 100, 0)}` : 'Not part of the cost of borrowing'} />}
+              {lt.hasBalloon && <MoneyInput label="Balloon / residual at the end" value={f.balloon} onChange={(balloon) => set({ balloon })} max={f.amount - 1} range={[0, Math.max(10_000, Math.round(f.amount * 0.6))]} hint="Lowers the EMI, but you owe this lump sum with the last EMI" />}
+              <TextInput type="date" label="First EMI date (for dates in the schedule)" value={f.startDate} onChange={(startDate) => set({ startDate })} />
             </div>
           </details>
         </div>

@@ -3,7 +3,7 @@ import { compareOffers, type Offer } from '../core/scenarios'
 import { compact, duration, locale, money, pct } from '../locale'
 import { getStore, newId, saveLoan, type Loan } from '../store/loans'
 import { Assumptions, Badge, Insight, PageHead, Section } from '../ui/bits'
-import { DecimalInput, FeeInput, MoneyInput, Segmented, Slider, TenureInput, TextInput } from '../ui/inputs'
+import { DecimalInput, FeeInput, MoneyInput, RANGES, Segmented, Slider, TenureInput, TextInput } from '../ui/inputs'
 
 interface OfferForm extends Offer {
   rateType: 'floating' | 'fixed'
@@ -106,15 +106,15 @@ export default function Compare() {
             <div className="row between">
               <TextInput label="Name" value={o.name} onChange={(name) => upd(o.id, { name })} />
             </div>
-            <MoneyInput label="Loan amount" value={o.principal} onChange={(principal) => upd(o.id, { principal })} required />
-            <DecimalInput label="Rate" value={o.rate} onChange={(rate) => upd(o.id, { rate })} max={40} step={0.05} suffix="% / year" />
+            <MoneyInput label="Loan amount" value={o.principal} onChange={(principal) => upd(o.id, { principal })} required range={RANGES.outstanding} />
+            <DecimalInput label="Rate" value={o.rate} onChange={(rate) => upd(o.id, { rate })} max={40} step={0.05} suffix="% / year" range={RANGES.rate} />
             <TenureInput label="Tenure" months={o.months} onChange={(months) => upd(o.id, { months })} />
             <FeeInput label="Processing fee" value={o.charges.processingFee} isPct={o.charges.processingFeeIsPct} base={o.principal} onChange={(processingFee, processingFeeIsPct) => upd(o.id, { charges: { ...o.charges, processingFee, processingFeeIsPct } })} />
             <details className="disclosure">
               <summary>Other charges and terms</summary>
               <div className="stack" style={{ marginTop: 8 }}>
-                <MoneyInput label="Legal, technical, other" value={o.charges.otherCharges} onChange={(otherCharges) => upd(o.id, { charges: { ...o.charges, otherCharges } })} />
-                <MoneyInput label="Insurance / bundled" value={o.charges.insurance} onChange={(insurance) => upd(o.id, { charges: { ...o.charges, insurance } })} />
+                <MoneyInput range={[0, 200_000]} label="Legal, technical, other" value={o.charges.otherCharges} onChange={(otherCharges) => upd(o.id, { charges: { ...o.charges, otherCharges } })} />
+                <MoneyInput range={[0, 500_000]} label="Insurance / bundled" value={o.charges.insurance} onChange={(insurance) => upd(o.id, { charges: { ...o.charges, insurance } })} />
                 <Segmented
                   label="Rate type"
                   value={o.rateType}
@@ -131,8 +131,8 @@ export default function Compare() {
                   </div>
                 )}
                 <div className="grid-2">
-                  <DecimalInput label="Prepayment charge" value={o.prepayPct} onChange={(prepayPct) => upd(o.id, { prepayPct })} max={10} />
-                  <DecimalInput label="Foreclosure charge" value={o.foreclosurePct} onChange={(foreclosurePct) => upd(o.id, { foreclosurePct })} max={10} />
+                  <DecimalInput label="Prepayment charge" value={o.prepayPct} onChange={(prepayPct) => upd(o.id, { prepayPct })} max={10} range={RANGES.chargePct} />
+                  <DecimalInput label="Foreclosure charge" value={o.foreclosurePct} onChange={(foreclosurePct) => upd(o.id, { foreclosurePct })} max={10} range={RANGES.chargePct} />
                 </div>
                 <div className="grid-2">
                   <TextInput label="Late payment charge" value={o.latePayment} onChange={(latePayment) => upd(o.id, { latePayment })} placeholder="e.g. 2% p.m." />

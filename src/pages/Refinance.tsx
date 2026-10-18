@@ -3,7 +3,7 @@ import { refinance } from '../core/scenarios'
 import { compact, duration, locale, money, pct } from '../locale'
 import { Assumptions, Insight, PageHead, Section, Stat } from '../ui/bits'
 import { NetLine } from '../ui/charts'
-import { DecimalInput, FeeInput, MoneyInput, Slider, TenureInput } from '../ui/inputs'
+import { DecimalInput, FeeInput, MoneyInput, RANGES, Slider, TenureInput } from '../ui/inputs'
 import { useLoanSource } from '../ui/LoanSource'
 
 export default function Refinance() {
@@ -67,11 +67,11 @@ export default function Refinance() {
           {src.ui}
           <hr className="rule" />
           <h2 className="h3">The new offer</h2>
-          <DecimalInput label="New interest rate" value={newRate} onChange={setNewRate} max={40} step={0.05} hint={gap > 0 ? `${pct(gap)} lower than today` : gap < 0 ? `${pct(-gap)} higher than today` : 'Same as today'} />
+          <DecimalInput label="New interest rate" value={newRate} onChange={setNewRate} max={40} step={0.05} range={RANGES.rate} hint={gap > 0 ? `${pct(gap)} lower than today` : gap < 0 ? `${pct(-gap)} higher than today` : 'Same as today'} />
           <TenureInput label="New tenure" months={nm} onChange={setNewMonths} hint={nm !== b.months ? `Your remaining tenure is ${duration(b.months)}. A longer tenure lowers EMI but adds interest.` : 'Same as your remaining tenure'} />
           <FeeInput label="New lender's processing fee" value={fee} isPct={feePct} base={b.principal} onChange={(v, p) => (setFee(v), setFeePct(p))} />
-          <MoneyInput label="Legal, valuation, MOD, other" value={other} onChange={setOther} hint={`${locale.chargeTax.label} added. Stamp duty on a new mortgage can apply in some states.`} />
-          <DecimalInput label="Current lender's foreclosure charge" value={foreclosurePct} onChange={setFc} max={10} suffix="% of balance" hint="Usually nil for floating-rate loans to individuals" />
+          <MoneyInput label="Legal, valuation, MOD, other" value={other} onChange={setOther} range={[0, 200_000]} hint={`${locale.chargeTax.label} added. Stamp duty on a new mortgage can apply in some states.`} />
+          <DecimalInput label="Current lender's foreclosure charge" value={foreclosurePct} onChange={setFc} max={10} range={RANGES.chargePct} suffix="% of balance" hint="Usually nil for floating-rate loans to individuals" />
         </div>
 
         <div className="stack-l" aria-live="polite">
